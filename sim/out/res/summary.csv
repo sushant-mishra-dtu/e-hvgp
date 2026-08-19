@@ -1,0 +1,6 @@
+"test","arch_match","place_diff","cyc_base","cyc_ehvgp","conf_base","conf_ehvgp","stall_base","stall_ehvgp","uops_base","uops_ehvgp"
+"mixed","YES","52","45","47","17","26","11","18","48","48"
+"narrowing","YES","56","30","33","16","22","11","14","32","32"
+"same","YES","28","33","33","0","0","0","0","24","24"
+"stress","YES","64","465","475","368","321","230","262","448","448"
+"widening","YES","48","43","43","26","27","17","18","48","48"

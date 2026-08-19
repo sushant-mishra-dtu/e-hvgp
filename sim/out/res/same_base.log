@@ -1,0 +1,39 @@
+﻿WARNING: rtl/core/imem.v:26: $readmemh(tests/same/prog.hex): Not enough words in the file for the requested range [0:1023].
+
+==========================================
+ E-HVGP TEST
+==========================================
+
+ Test:                same
+ Mode:                BASELINE
+
+ Cycles:              33
+ Instructions:        13
+ Vector instructions: 12
+   widening:          0
+   narrowing:         0
+ Vector micro-ops:    24
+ VRF read  accesses:  46
+ VRF write accesses:  24
+ VRF accesses (tot):  70
+ Bank conflicts:      0
+   read conflicts:    0
+   write conflicts:   0
+ Bank stall cycles:   0
+ Rename stall cycles: 0
+
+ Topology allocations (start_bank, stride):
+   topo 0 = (start 0, stride 1) : 6
+   topo 1 = (start 1, stride 1) : 0
+   topo 2 = (start 2, stride 1) : 6
+   topo 3 = (start 3, stride 1) : 0
+   topo 4 = (start 0, stride 3) : 0
+   topo 5 = (start 1, stride 3) : 0
+   topo 6 = (start 2, stride 3) : 0
+   topo 7 = (start 3, stride 3) : 0
+
+ Final vtype = 0x011  vl = 8  vill = 0
+==========================================
+
+RESULT: PASS
+tb/tb_top.v:158: $finish called at 449000 (1ps)

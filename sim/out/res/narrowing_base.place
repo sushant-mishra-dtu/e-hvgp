@@ -1,0 +1,55 @@
+# physical placement : narrowing  mode=BASELINE
+v0 preg=36 bank=2 slot=4 topo=2 idx=0
+v1 preg=52 bank=3 slot=4 topo=2 idx=1
+v2 preg=2 bank=0 slot=2 topo=0 idx=0
+v3 preg=18 bank=1 slot=2 topo=0 idx=1
+v4 preg=35 bank=2 slot=3 topo=2 idx=0
+v5 preg=51 bank=3 slot=3 topo=2 idx=1
+v6 preg=3 bank=0 slot=3 topo=0 idx=0
+v7 preg=19 bank=1 slot=3 topo=0 idx=1
+v8 preg=8 bank=0 slot=8 topo=0 idx=0
+v9 preg=24 bank=1 slot=8 topo=0 idx=1
+v10 preg=40 bank=2 slot=8 topo=0 idx=2
+v11 preg=56 bank=3 slot=8 topo=0 idx=3
+v12 preg=9 bank=0 slot=9 topo=0 idx=0
+v13 preg=25 bank=1 slot=9 topo=0 idx=1
+v14 preg=41 bank=2 slot=9 topo=0 idx=2
+v15 preg=57 bank=3 slot=9 topo=0 idx=3
+v16 preg=10 bank=0 slot=10 topo=0 idx=0
+v17 preg=26 bank=1 slot=10 topo=0 idx=1
+v18 preg=42 bank=2 slot=10 topo=0 idx=2
+v19 preg=58 bank=3 slot=10 topo=0 idx=3
+v20 preg=11 bank=0 slot=11 topo=0 idx=0
+v21 preg=27 bank=1 slot=11 topo=0 idx=1
+v22 preg=43 bank=2 slot=11 topo=0 idx=2
+v23 preg=59 bank=3 slot=11 topo=0 idx=3
+v24 preg=12 bank=0 slot=12 topo=0 idx=0
+v25 preg=28 bank=1 slot=12 topo=0 idx=1
+v26 preg=44 bank=2 slot=12 topo=2 idx=0
+v27 preg=60 bank=3 slot=12 topo=2 idx=1
+v28 preg=13 bank=0 slot=13 topo=0 idx=0
+v29 preg=29 bank=1 slot=13 topo=0 idx=1
+v30 preg=34 bank=2 slot=2 topo=2 idx=0
+v31 preg=50 bank=3 slot=2 topo=2 idx=1
+# counters
+cycles              30
+instructions        13
+vector_instructions 12
+vector_uops         32
+vrf_read_requests   80
+vrf_write_requests  32
+bank_conflicts      16
+bank_read_conflicts 16
+bank_write_conflict 0
+bank_stall_cycles   11
+rename_stall_cycles 4
+widening            4
+narrowing           8
+topo_0_allocations  8
+topo_1_allocations  0
+topo_2_allocations  4
+topo_3_allocations  0
+topo_4_allocations  0
+topo_5_allocations  0
+topo_6_allocations  0
+topo_7_allocations  0

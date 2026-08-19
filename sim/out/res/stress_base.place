@@ -1,0 +1,55 @@
+# physical placement : stress  mode=BASELINE
+v0 preg=12 bank=0 slot=12 topo=0 idx=0
+v1 preg=28 bank=1 slot=12 topo=0 idx=1
+v2 preg=44 bank=2 slot=12 topo=0 idx=2
+v3 preg=60 bank=3 slot=12 topo=0 idx=3
+v4 preg=5 bank=0 slot=5 topo=0 idx=0
+v5 preg=21 bank=1 slot=5 topo=0 idx=1
+v6 preg=37 bank=2 slot=5 topo=0 idx=2
+v7 preg=53 bank=3 slot=5 topo=0 idx=3
+v8 preg=14 bank=0 slot=14 topo=0 idx=0
+v9 preg=30 bank=1 slot=14 topo=0 idx=1
+v10 preg=46 bank=2 slot=14 topo=0 idx=2
+v11 preg=62 bank=3 slot=14 topo=0 idx=3
+v12 preg=15 bank=0 slot=15 topo=0 idx=4
+v13 preg=31 bank=1 slot=15 topo=0 idx=5
+v14 preg=47 bank=2 slot=15 topo=0 idx=6
+v15 preg=63 bank=3 slot=15 topo=0 idx=7
+v16 preg=0 bank=0 slot=0 topo=0 idx=0
+v17 preg=16 bank=1 slot=0 topo=0 idx=1
+v18 preg=32 bank=2 slot=0 topo=0 idx=2
+v19 preg=48 bank=3 slot=0 topo=0 idx=3
+v20 preg=1 bank=0 slot=1 topo=0 idx=4
+v21 preg=17 bank=1 slot=1 topo=0 idx=5
+v22 preg=8 bank=0 slot=8 topo=0 idx=0
+v23 preg=24 bank=1 slot=8 topo=0 idx=1
+v24 preg=40 bank=2 slot=8 topo=2 idx=0
+v25 preg=56 bank=3 slot=8 topo=2 idx=1
+v26 preg=6 bank=0 slot=6 topo=0 idx=0
+v27 preg=22 bank=1 slot=6 topo=0 idx=1
+v28 preg=11 bank=0 slot=11 topo=0 idx=0
+v29 preg=27 bank=1 slot=11 topo=0 idx=1
+v30 preg=43 bank=2 slot=11 topo=2 idx=0
+v31 preg=59 bank=3 slot=11 topo=2 idx=1
+# counters
+cycles              465
+instructions        209
+vector_instructions 160
+vector_uops         448
+vrf_read_requests   960
+vrf_write_requests  448
+bank_conflicts      368
+bank_read_conflicts 368
+bank_write_conflict 0
+bank_stall_cycles   230
+rename_stall_cycles 231
+widening            48
+narrowing           32
+topo_0_allocations  88
+topo_1_allocations  8
+topo_2_allocations  56
+topo_3_allocations  8
+topo_4_allocations  0
+topo_5_allocations  0
+topo_6_allocations  0
+topo_7_allocations  0
