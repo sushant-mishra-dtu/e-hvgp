@@ -8,6 +8,7 @@ performance comparison.  It never invents numbers: everything printed comes
 from a simulation output file.
 """
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +17,15 @@ RES = os.path.join(ROOT, "sim", "out", "res")
 KEYS = ["cycles", "instructions", "vector_instructions", "vector_uops",
         "vrf_read_requests", "vrf_write_requests",
         "bank_conflicts", "bank_read_conflicts", "bank_write_conflict",
-        "bank_stall_cycles", "rename_stall_cycles", "widening", "narrowing"]
+        "bank_stall_cycles", "rename_stall_cycles",
+        "stall_alloc_cycles", "stall_desc_cycles", "stall_cmtq_cycles",
+        "widening", "narrowing"]
+
+# rename_stall_cycles split by cause.  Present only in results produced after
+# the counter split; older result files legitimately lack them.
+STALL_CAUSES = [("stall_alloc_cycles", "free-list fit"),
+                ("stall_desc_cycles",  "descriptor queue full"),
+                ("stall_cmtq_cycles",  "mini-ROB full")]
 
 
 def read_counters(path):
@@ -30,9 +39,15 @@ def read_counters(path):
     return d
 
 
+# physical placement lines only: "v<n> preg=... bank=... slot=... topo=... idx=..."
+# (not the vector_*/vrf_* counter lines, which also start with "v")
+PLACE_LINE = re.compile(r"^v[0-9]+ ")
+
+
 def read_place(path):
-    return [l.strip() for l in open(path) if l.startswith("v")] \
-        if os.path.isfile(path) else []
+    if not os.path.isfile(path):
+        return []
+    return [l.strip() for l in open(path) if PLACE_LINE.match(l)]
 
 
 def pct(b, e):
@@ -84,6 +99,31 @@ def main():
                   "vector_uops", "vrf_read_requests"]:
             print(f"  {t:<12}{k:<22}{cb.get(k,0):>10}{ce.get(k,0):>10}"
                   f"{pct(cb.get(k,0), ce.get(k,0)):>10}")
+        print()
+
+    print("=" * 78)
+    print(" RENAME-STALL ATTRIBUTION  (causes overlap; they do not sum to the total)")
+    print("=" * 78)
+    shown = False
+    for t in tests:
+        cb = read_counters(os.path.join(RES, f"{t}_base.place"))
+        ce = read_counters(os.path.join(RES, f"{t}_ehvgp.place"))
+        if not cb or not ce:
+            continue
+        if not any(k in cb or k in ce for k, _ in STALL_CAUSES):
+            print(f"  {t:<12} not instrumented in this result set -- re-run the "
+                  f"simulation to populate")
+            continue
+        shown = True
+        print(f"  {t:<12}{'rename_stall_cycles':<22}"
+              f"{cb.get('rename_stall_cycles',0):>10}"
+              f"{ce.get('rename_stall_cycles',0):>10}"
+              f"{pct(cb.get('rename_stall_cycles',0), ce.get('rename_stall_cycles',0)):>10}")
+        for k, label in STALL_CAUSES:
+            print(f"  {'':<12}{'  ' + label:<22}{cb.get(k,0):>10}{ce.get(k,0):>10}"
+                  f"{pct(cb.get(k,0), ce.get(k,0)):>10}")
+        print()
+    if not shown:
         print()
 
     print("=" * 78)

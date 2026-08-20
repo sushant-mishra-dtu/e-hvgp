@@ -49,6 +49,7 @@ module tb_top;
    wire [31:0] bank_conflict_count, bank_read_conflicts, bank_write_conflicts;
    wire [31:0] bank_stall_cycles, widening_count, narrowing_count;
    wire [31:0] rename_stall_cycles;
+   wire [31:0] stall_alloc_cycles, stall_desc_cycles, stall_cmtq_cycles;
    wire [NUM_TOPO*32-1:0] topo_alloc;
 
    reg  [4:0]        dbg_arch = 5'd0;
@@ -85,6 +86,9 @@ module tb_top;
       .bank_stall_cycles(bank_stall_cycles),
       .widening_count(widening_count), .narrowing_count(narrowing_count),
       .rename_stall_cycles(rename_stall_cycles),
+      .stall_alloc_cycles(stall_alloc_cycles),
+      .stall_desc_cycles(stall_desc_cycles),
+      .stall_cmtq_cycles(stall_cmtq_cycles),
       .topo_alloc(topo_alloc),
       .dbg_arch(dbg_arch), .dbg_preg(dbg_preg), .dbg_topo(dbg_topo),
       .dbg_slot(dbg_slot), .dbg_idx(dbg_idx), .dbg_vdata(dbg_vdata),
@@ -185,6 +189,10 @@ module tb_top;
          $display("   write conflicts:   %0d", bank_write_conflicts);
          $display(" Bank stall cycles:   %0d", bank_stall_cycles);
          $display(" Rename stall cycles: %0d", rename_stall_cycles);
+         $display("   free-list fit:     %0d", stall_alloc_cycles);
+         $display("   descriptor queue:  %0d", stall_desc_cycles);
+         $display("   mini-ROB full:     %0d", stall_cmtq_cycles);
+         $display("   (causes overlap; they do not sum to the total)");
          $display("");
          $display(" Topology allocations (start_bank, stride):");
          for (t = 0; t < NUM_TOPO; t = t + 1)
@@ -246,6 +254,9 @@ module tb_top;
          $fdisplay(fp, "bank_write_conflict %0d", bank_write_conflicts);
          $fdisplay(fp, "bank_stall_cycles   %0d", bank_stall_cycles);
          $fdisplay(fp, "rename_stall_cycles %0d", rename_stall_cycles);
+         $fdisplay(fp, "stall_alloc_cycles  %0d", stall_alloc_cycles);
+         $fdisplay(fp, "stall_desc_cycles   %0d", stall_desc_cycles);
+         $fdisplay(fp, "stall_cmtq_cycles   %0d", stall_cmtq_cycles);
          $fdisplay(fp, "widening            %0d", widening_count);
          $fdisplay(fp, "narrowing           %0d", narrowing_count);
          for (t = 0; t < NUM_TOPO; t = t + 1)

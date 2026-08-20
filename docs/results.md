@@ -161,10 +161,53 @@ denial*, and it is the latter that maps onto lost time. E-HVGP spread the
 same contention over more cycles — fewer denials per cycle, but more cycles
 with a denial. **The v1 cost function optimises the wrong objective.**
 
-A second caveat on `stress`: 231 of 465 baseline cycles (~50%) are
-`rename_stall_cycles`, i.e. front-end backpressure, which dilutes the
-sensitivity of this workload to bank behaviour. `stress` is the least
-discriminating benchmark, not the most.
+The mismatch is not an accident of this workload; it is algebraic.
+`coread_cost` is defined as `n_requests - n_distinct_banks` per window, which
+*is* a denial count for the window — the same reduction `bank_conflict_count`
+applies. The selector therefore minimises Σ denials while the machine pays
+Σ windows-containing-a-denial. See `docs/ehvgp.md` Section 5, "Known defect in
+v1", for the derivation. `stress` is where the function has enough shape
+variety to discriminate, so it is where the wrong target shows up as time.
+
+A second observation on `stress`: 231 of 465 baseline cycles (~50%) are
+`rename_stall_cycles`. These are **not** an independent population insensitive
+to bank behaviour. Two of the three stall sources in
+`v_can_go = alloc_ok & desc_ready & ~cq_full` are downstream backpressure
+(`desc_ready`, `cq_full`), and that queue chain drains through operand
+collect — exactly where the arbiter denies reads. Bank conflicts stall operand
+collection, the queues fill, and the backpressure surfaces upstream as rename
+stall. The published deltas are consistent with the coupling: rename stall
+only moves where bank stall moves substantially.
+
+| Test | Δ bank stall | Δ rename stall |
+|---|---|---|
+| `same` | 0 | 0 |
+| `widening` | +1 | 0 |
+| `narrowing` | +3 | 0 |
+| `mixed` | +7 | +3 |
+| `stress` | +32 | +19 |
+
+Coupling of that kind makes `stress` **understate** the mechanism's effect on
+time rather than manufacture one, so the `+2.2%` cycle figure should be read as
+directional, not as a calibrated cost. (An earlier revision of this section
+argued the opposite — that the rename-stall population dilutes sensitivity and
+makes `stress` the least discriminating benchmark. That was backwards.)
+
+The sign disagreement itself is unaffected either way: conflicts down 12.8%
+while stall cycles rise 13.9% on the same run. A dilution or coupling argument
+is about magnitude; it cannot flip the relative direction of two counters
+measured simultaneously.
+
+**Caveat on the attribution.** Rename stall has a second channel into
+`EHVGP_ENABLE` that has nothing to do with bank backpressure: `alloc_ok` is
+evaluated at the *selected* topology, so a different `sel_topo` can fail the
+free-list fit where the baseline's choice would have succeeded
+(`docs/architecture.md` Section 6). The correlation table above favours the
+backpressure channel — a free-list-fit channel has no obvious reason to track
+bank-stall magnitude — but that is inference, not measurement. The
+`stall_alloc_cycles` / `stall_desc_cycles` / `stall_cmtq_cycles` counters
+(`docs/architecture.md` Section 9) were added to settle it; **they are not yet
+populated in the numbers above**, which predate the split.
 
 ### 5.5 `same` — the control behaves as expected
 
@@ -190,6 +233,26 @@ change that lets successive same-shape groups differ.
 
 **This change has not been implemented.** It modifies the research mechanism
 and requires explicit sign-off first.
+
+### Two failure modes, one remedy
+
+The measurements show two distinct failures, and the correction above addresses
+only the first:
+
+* **Failure A — no information.** On homogeneous streams all 8 candidates tie
+  (`cost=8` on every `widening` allocation), tie-breakers decide, and placement
+  is constant. Root-caused in Section 5.3 to the pure-structural-function
+  constraint. This is what the EMUL-indexed rotation fixes.
+* **Failure B — wrong target.** Where the function *does* discriminate, it
+  discriminates toward conflicts rather than stall cycles (Section 5.4,
+  `docs/ehvgp.md` Section 5). The rotation does not change what the selector
+  minimises.
+
+A v2 that fixes A and keeps the current `coread_cost` would still optimise the
+wrong objective, and `stress` is the existing evidence for that. The direct
+test for B is a `coread_cost` variant counting *windows containing a denial*
+rather than *denials*. **Also not implemented**, and requiring sign-off on the
+same grounds.
 
 ---
 

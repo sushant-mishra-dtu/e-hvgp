@@ -55,6 +55,12 @@ module rv_core #(
    output reg  [31:0] widening_count,
    output reg  [31:0] narrowing_count,
    output reg  [31:0] rename_stall_cycles,
+   // Attribution of rename_stall_cycles by cause.  The three causes are not
+   // mutually exclusive -- a cycle blocked by two of them increments both --
+   // so these do NOT sum to rename_stall_cycles in general.
+   output reg  [31:0] stall_alloc_cycles,
+   output reg  [31:0] stall_desc_cycles,
+   output reg  [31:0] stall_cmtq_cycles,
    output wire [NUM_TOPO*32-1:0] topo_alloc,
 
    //--- debug / architectural state dump ---------------------------------
@@ -354,6 +360,9 @@ module rv_core #(
          widening_count       <= 32'd0;
          narrowing_count      <= 32'd0;
          rename_stall_cycles  <= 32'd0;
+         stall_alloc_cycles   <= 32'd0;
+         stall_desc_cycles    <= 32'd0;
+         stall_cmtq_cycles    <= 32'd0;
          cq_wr                <= 0;
          cq_rd                <= 0;
          for (i = 0; i < 32; i = i + 1) xreg[i] <= 32'd0;
@@ -375,7 +384,14 @@ module rv_core #(
          bank_conflict_count  <= bank_conflict_count  + {24'd0, rd_denied} + {24'd0, wr_denied};
          if ((rd_denied != 8'd0) || (wr_denied != 8'd0))
             bank_stall_cycles <= bank_stall_cycles + 32'd1;
-         if (stall) rename_stall_cycles <= rename_stall_cycles + 32'd1;
+         if (stall) begin
+            rename_stall_cycles <= rename_stall_cycles + 32'd1;
+            // v_can_go carries the three blocking conditions separately;
+            // attribute the stalled cycle to every condition asserted in it.
+            if (!alloc_ok)   stall_alloc_cycles <= stall_alloc_cycles + 32'd1;
+            if (!desc_ready) stall_desc_cycles  <= stall_desc_cycles  + 32'd1;
+            if (cq_full)     stall_cmtq_cycles  <= stall_cmtq_cycles  + 32'd1;
+         end
 
          //--------------------------------------------------------------
          // Front end

@@ -161,8 +161,22 @@ One free bit per physical register (`free_vec[64]`). Allocating a group of
 `G` registers with topology `t` requires a base slot `s` such that all `G`
 derived physical registers are free and `s + ceil(G/B) - 1 < REGS_PER_BANK`.
 The search is a **lowest-slot-first scan** and is byte-identical in both
-configurations, so any behavioural difference comes from the topology and
-never from the search.
+configurations: no search logic is conditioned on `EHVGP_ENABLE`.
+
+Its *outcome*, however, is not configuration-independent. Feasibility is
+evaluated at the selected topology — `p = f_preg(sel_topo, s, i)` in
+`rtl/rename/vector_rename.v` — so a different `sel_topo` can fail to find a
+feasible base slot where the baseline's choice would have succeeded, and vice
+versa. `alloc_ok` therefore depends on the topology, and since `alloc_ok` feeds
+`v_can_go` in `rtl/core/rv_core.v`, **`EHVGP_ENABLE` has a path into
+`rename_stall_cycles` that is independent of bank backpressure.**
+
+The identity of the search is thus not sufficient to conclude identity of stall
+behaviour. It remains sufficient for the fairness argument (`docs/ehvgp.md`
+Section 7): E-HVGP receives no extra registers, ports, bandwidth or reduced
+penalties, and the structural fairness counters stay bit-identical. The
+`stall_alloc_cycles` counter in Section 9 exists to measure this channel
+directly rather than argue about it.
 
 Physical registers are released **at commit**: the mini-ROB entry carries
 the displaced mapping's register mask (`old_free_mask`), captured at rename.
@@ -219,8 +233,24 @@ needed in the testbench):
 `cycle_count`, `instr_count`, `vinstr_count`, `vuop_count`,
 `vrf_read_requests`, `vrf_write_requests`, `bank_conflict_count`,
 `bank_read_conflicts`, `bank_write_conflicts`, `bank_stall_cycles`,
-`rename_stall_cycles`, `widening_count`, `narrowing_count`,
-`topo_alloc[0..7]`.
+`rename_stall_cycles`, `stall_alloc_cycles`, `stall_desc_cycles`,
+`stall_cmtq_cycles`, `widening_count`, `narrowing_count`, `topo_alloc[0..7]`.
+
+### `rename_stall_cycles` attribution
+
+`stall = v_active & ~(alloc_ok & desc_ready & ~cq_full)` has three causes, and
+the last three counters split it by cause:
+
+| counter | condition | meaning |
+|---|---|---|
+| `stall_alloc_cycles` | `!alloc_ok` | free-list scan found no feasible base slot at the selected topology |
+| `stall_desc_cycles`  | `!desc_ready` | vector descriptor queue full |
+| `stall_cmtq_cycles`  | `cq_full` | mini-ROB full |
+
+The three conditions are **not mutually exclusive** — a cycle blocked by two of
+them increments both — so the parts do not sum to `rename_stall_cycles`. This
+is instrumentation only: no counter feeds any control path, and the split is
+identical in both configurations.
 
 ---
 

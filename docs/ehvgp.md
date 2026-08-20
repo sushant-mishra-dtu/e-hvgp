@@ -162,6 +162,29 @@ total(t) = 4·coread_cost(t) + 2·stride_mismatch(t) + start_penalty(t)
 Selection = `argmin total`, lowest topology id on a tie. Fully
 deterministic: identical inputs always produce identical output.
 
+### Known defect in v1: `coread_cost` models the wrong counter
+
+`n_requests - n_distinct_banks` **is a denial count for the window**: a window
+with 3 requests landing on 1 bank scores `3 - 1 = 2`, matching the two requests
+the arbiter would deny. It is therefore structurally the same reduction as
+`bank_conflict_count` (Section 6), not as `bank_stall_cycles`.
+
+Only `bank_stall_cycles` maps onto lost time — the core loses one cycle whether
+one request or three were denied in it. A stall-cycle-faithful objective would
+score the window above as `1`. Summed over windows, `coread_cost` minimises
+Σ denials while the machine pays Σ windows-containing-a-denial, and those are
+not monotonically related: spreading the same contention thinner across more
+windows lowers the first and raises the second.
+
+This is the algebraic form of the "wrong objective" verdict in
+`docs/results.md` Section 5.4, and `stress` is its measured instance — E-HVGP
+wins on conflicts (−12.8%) and loses on stall cycles (+13.9%) in the same run.
+
+**Not fixed in v1.** A `coread_cost` variant counting *windows containing a
+denial* rather than *denials* is the direct test, but it changes the research
+mechanism and requires sign-off on the same grounds as `docs/results.md`
+Section 6.
+
 ### Recovery
 
 `topology_id` lives in the same rename-map structure as the physical base

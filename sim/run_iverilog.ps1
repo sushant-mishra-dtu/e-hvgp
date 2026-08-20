@@ -94,6 +94,10 @@ foreach ($t in $tests) {
         stall_ehvgp = GetC $fe "bank_stall_cycles"
         uops_base   = GetC $fb "vector_uops"
         uops_ehvgp  = GetC $fe "vector_uops"
+        rn_base     = GetC $fb "rename_stall_cycles"
+        rn_ehvgp    = GetC $fe "rename_stall_cycles"
+        rnalloc_b   = GetC $fb "stall_alloc_cycles"
+        rnalloc_e   = GetC $fe "stall_alloc_cycles"
     }
 }
 
